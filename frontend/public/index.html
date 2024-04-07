@@ -1,24 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="icon" href="call2.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta
-      name="description"
-      content="A video streaming platform for the modern web."
-    />
-    
-    
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-   
-    <title>Glimpse-Elevating Your Video Calls</title>
-  </head>
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
-    <script src="https://kit.fontawesome.com/c7af67be4b.js" crossorigin="anonymous"></script>
-   
-  </body>
+
+<head>
+  <meta charset="utf-8" />
+  <link rel="icon" href="call2.png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="description" content="A video streaming platform for the modern web." />
+
+
+  <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+
+  <title>Glimpse-Elevating Your Video Calls</title>
+</head>
+
+<body>
+  <noscript>You need to enable JavaScript to run this app.</noscript>
+  <div id="root"></div>
+  <script src="https://kit.fontawesome.com/c7af67be4b.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.botpress.cloud/webchat/v1/inject.js"></script>
+  <script>
+    window.botpressWebChat.init({
+      "composerPlaceholder": "Chat with bot",
+      "botConversationDescription": "This chatbot was built surprisingly fast with Botpress",
+      "botId": "0c593246-0e15-4a93-916a-88f0880b8aab",
+      "hostUrl": "https://cdn.botpress.cloud/webchat/v1",
+      "messagingUrl": "https://messaging.botpress.cloud",
+      "clientId": "0c593246-0e15-4a93-916a-88f0880b8aab",
+      "webhookId": "e2e0c7b3-ff38-4f27-9f12-024736e3b428",
+      "lazySocket": true,
+      "themeName": "prism",
+      "frontendVersion": "v1",
+      "showPoweredBy": true,
+      "theme": "prism",
+      "themeColor": "#2563eb"
+    });
+  </script>
+
+</body>
+
 </html>
