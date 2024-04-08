@@ -1,102 +1,93 @@
 /* eslint-disable no-unused-vars */
 
-import { useState,createContext,useEffect,useRef } from "react";
-import {Socket, io} from "socket.io-client";
+import { useState, createContext, useEffect, useRef } from "react";
+import { io } from "socket.io-client";
 import Peer from "simple-peer";
 
 const SocketContext = createContext();
-const socket=io("http://localhost:5000");
+const socket = io("http://localhost:5000");
 
-//                    NOTES AT THE END OF THE FILE
+const Contextprovider = ({ children }) => {
+    const [stream, setStream] = useState(null);
+    const [me, setMe] = useState(""); // Our own id
+    const [call, setCall] = useState({}); // Object that will contain all the information about the call
+    const [callAccepted, setCallAccepted] = useState(false); // To check if the call is accepted or not
+    const [callEnded, setCallEnded] = useState(false); // To check if the call is ended or not
+    const myVideo = useRef(); // Reference to the video element for local user
+    const userVideo = useRef(); // Reference to the video element for remote user
+    const connectionRef = useRef(); // Reference to the peer connection
+    const [name, setName] = useState(""); // To store the name of the user
 
-const Contextprovider=({children})=>{
+    useEffect(() => {
+        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+            .then((currentStream) => {
+                setStream(currentStream);
+                myVideo.current.srcObject = currentStream;
+            });
 
-    const [stream,setStream]=useState(null);
-    const [me,setMe]=useState("");    //our own id
-    const [call,setCall]=useState({});  //object that will contain all the information about the call
-    const [callAccepted,setCallAccepted]=useState(false);  //to check if the call is accepted or not
-    const [callEnded,setCallEnded]=useState(false);  //to check if the call is ended or not
-    const myVideo=useRef(); //useRef is used to create a reference to the video element
-    const userVideo=useRef(); //useRef is used to create a reference to the video element
-    const connectionRef=useRef();  //Create a reference to the peer connection
-    const [name,setName]=useState(""); //to store the name of the user
-
-    useEffect(()=>{
-        navigator.mediaDevices.getUserMedia({video:true,audio:true})
-        .then((currentStream)=>{
-            setStream(currentStream);
-
-            myVideo.current.srcObject=currentStream;
+        socket.on("me", (id) => {
+            setMe(id);
         });
 
-        socket.on("me",(id)=>{
-            setMe(id);
-        })
+        socket.on("calluser", ({ from, name: callerName, signal }) => {
+            setCall({ isReceivedCall: true, from, callerName, signal });
+        });
+    }, []);
 
-        //de-structured  into three variables: from, name (renamed as callerName), and signal.
-        socket.on("calluser",({from,name:callerName,signal})=>{
-            setCall({isRecievedCall:true,from,callerName,signal})   
-
-        })
-    },[])
-       
-
-    //these are 3 functions that we need to run our video chat app
-    const answerCall=()=>{
+    const answerCall = () => {
         setCallAccepted(true);
 
-        const peer=new Peer({initiator:false,trickle:false,stream}); // peer is the object that will help us to connect to the other user and trickle is set to false to avoid the delay in the connection and initiator is set to false because we are not the one who is calling
+        const peer = new Peer({ initiator: false, trickle: false, stream });
 
-        peer.on("signal",(data)=>{
-            socket.emit("answercall",{signal:data,to:call.from})
-        })  //this will send the signal to the other user and the other user will send the signal back to us 
-
-        //explained more briefly after notes
-        peer.on("stream",(currentStream)=>{
-            userVideo.current.srcObject=currentStream; //srcObject is used to set the stream of the other user  
-        })  //this will set the stream of the other user    
-
-        peer.signal(call.signal);  //this will send the signal back to the other user
-
-
-    }
-    const callUser=(id)=>{
-        const peer=new Peer({initiator:true,trickle:false,stream}); // initiator is set to true because we are the one who is calling
-
-        peer.on("signal",(data)=>{
-            socket.emit("calluser",{userToCall:id,signalData:data,from:me,name});  //this will send the signal to the other user 
+        peer.on("signal", (data) => {
+            socket.emit("answercall", { signal: data, to: call.from });
         });
 
-        peer.on("stream",(currentStream)=>{ 
-            userVideo.current.srcObject=currentStream; 
+        peer.on("stream", (currentStream) => {
+            userVideo.current.srcObject = currentStream;
         });
 
-        socket.on("callaccepted",(signal)=>{
+        if (call.signal) {
+            peer.signal(call.signal);
+        }
+    };
+
+    const callUser = (id) => {
+        const peer = new Peer({ initiator: true, trickle: false, stream });
+
+        peer.on("signal", (data) => {
+            socket.emit("calluser", { userToCall: id, signalData: data, from: me, name });
+        });
+
+        peer.on("stream", (currentStream) => {
+            userVideo.current.srcObject = currentStream;
+        });
+
+        socket.on("callaccepted", (signal) => {
             setCallAccepted(true);
             peer.signal(signal);
-        })
+        });
 
-        connectionRef.current=peer;
+        connectionRef.current = peer;
+    };
 
-        
-    }
-    const leaveCall=()=>{
+    const leaveCall = () => {
         setCallEnded(true);
-        connectionRef.current.destroy();
-
-        window.location.reload();
-        //this will reload the page and the call will be ended
-
-    }
+        if (connectionRef.current) {
+            connectionRef.current.destroy();
+        }
+        window.location.reload(); // Reload the page to end the call
+    };
 
     return (
-        <SocketContext.Provider value={{call,callAccepted,myVideo,userVideo,stream,name,setName,callEnded,me,callUser,leaveCall,answerCall}}> 
-        
-        </SocketContext.Provider>      
-    )
-}
+        <SocketContext.Provider value={{ call, callAccepted, myVideo, userVideo, stream, name, setName, callEnded, me, callUser, leaveCall, answerCall }}>
+            {children}
+        </SocketContext.Provider>
+    );
+};
 
-export {Contextprovider,SocketContext};
+export { Contextprovider, SocketContext };
+
 
 
 
