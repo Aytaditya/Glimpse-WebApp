@@ -3,14 +3,14 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
- import { Contextprovider } from './SocketContext';
+ import { ContextProvider } from './SocketContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <Contextprovider>
+    <ContextProvider>
     <App />
-    </Contextprovider>
+    </ContextProvider>
   </React.StrictMode>
 );
 
