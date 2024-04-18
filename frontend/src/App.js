@@ -7,13 +7,15 @@ import VideoPlayer from './components/VideoPlayer';
 
 function App() {
   return (
-    <div className="bg-slate-900 h-screen">
+    <div className="bg-slate-900 h-full w-full overflow-x-auto overflow-y-hidden">
       <Navbar />
       <div className="flex flex-col w-screen items-center mt-5 text-slate-300 ">
         <VideoPlayer />
-        <Options>
-          <Notifications />
-        </Options>
+        <Notifications/>
+        <Options/>
+       
+          
+        
       </div>
 
     </div>
